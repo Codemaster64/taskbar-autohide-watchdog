@@ -103,6 +103,7 @@ public class Flash : System.Windows.Forms.NativeWindow {
 
 $flash = [Flash]::new()
 $stuck = 0
+$nudged = $false
 # ponytail: ticks every 100ms (edge reveal needs to feel instant); only nudges after 3s
 # of stuck-visible with nothing flashing, so a taskbar the user is using (cursor near it)
 # or an app is flagging is never touched. Only sees flashes that start after this script
@@ -112,6 +113,10 @@ $edge = 0
 $timer = [System.Windows.Forms.Timer]::new()
 $timer.Interval = 100
 $timer.Add_Tick({
+    # One recovery per user interaction. If Explorer immediately shows the bar
+    # again, repeating SETSTATE every three seconds makes it bounce indefinitely.
+    # A brief hide caused by our own reset must not re-arm recovery.
+    if ([Tb]::InBottom([Tb]::Thickness() + 8)) { $script:nudged = $false }
     # Cursor on the bottom pixel: let Windows slide the bar up itself (smooth); only if it
     # hasn't appeared after ~300ms force it up, and keep it up until the cursor leaves.
     if (-not $script:revealed) {
@@ -124,7 +129,9 @@ $timer.Add_Tick({
         return
     }
     if ($flash.Flashing.Count -eq 0 -and [Tb]::StuckVisible()) { $script:stuck++ } else { $script:stuck = 0 }
-    if ($script:stuck -ge 30) { [Tb]::Nudge(); $script:stuck = 0 }
+    if ($script:stuck -ge 30 -and -not $script:nudged) {
+        [Tb]::Nudge(); $script:nudged = $true; $script:stuck = 0
+    }
 })
 $timer.Start()
 [System.Windows.Forms.Application]::Run()

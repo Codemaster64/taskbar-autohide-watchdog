@@ -2,7 +2,7 @@
 
 Windows 11 PowerShell script that keeps the taskbar auto-hiding and makes the bottom screen edge reliably reveal it.
 
-- Re-applies auto-hide if the taskbar sits visible while the cursor is elsewhere (skipped while an app is flashing for attention).
+- Re-applies auto-hide once if the taskbar sits visible while the cursor is elsewhere (skipped while an app is flashing for attention). Recovery re-arms when the cursor returns to the taskbar's bottom strip, preventing repeated resets if Windows keeps it visible.
 - Reveals the taskbar when the cursor touches the bottom pixel row of any monitor; Windows' own slide animation is used first, and the script only forces it up if it hasn't appeared after ~0.3s.
 
 ```powershell
