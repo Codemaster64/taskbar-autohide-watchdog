@@ -11,4 +11,11 @@ pwsh taskbar-autohide.ps1 -Install     # run hidden at every logon (no admin nee
 pwsh taskbar-autohide.ps1 -Uninstall   # remove the logon task
 ```
 
+The installed task runs on battery power, has no runtime limit, and retries up to
+three times at one-minute intervals after a failure. Run `-Install` again after
+updating to replace older task settings. Keep the installed script at that path.
+
+Check installer settings without changing your scheduled task:
+`pwsh -NoProfile -File test-install.ps1`.
+
 Limits: auto-hide is a single global Windows setting, so every monitor's taskbar behaves the same; the stuck-visible check watches the primary taskbar only; the taskbar is assumed to be at the bottom.

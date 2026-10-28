@@ -12,7 +12,13 @@ if ($Install) {
     $a = New-ScheduledTaskAction -Execute (Get-Process -Id $PID).Path `
         -Argument "-NoProfile -WindowStyle Hidden -File `"$PSCommandPath`""
     # -User scopes the trigger to this account; an any-user logon trigger needs admin.
+    # This is a continuous watchdog: Task Scheduler defaults stop it on battery
+    # power or after 72 hours, leaving no process to repair the taskbar.
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries `
+        -DontStopIfGoingOnBatteries -ExecutionTimeLimit ([TimeSpan]::Zero) `
+        -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -StartWhenAvailable
     Register-ScheduledTask $task -Action $a -Force `
+        -Settings $settings `
         -Trigger (New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME) | Out-Null
     Start-ScheduledTask $task
     return
